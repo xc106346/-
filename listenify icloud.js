@@ -8,7 +8,7 @@ const headers = {
 
 const appConfig = {
   "ver": 1,
-  "name": "測試",
+  "name": "胥超个人",
   "message": "",
   "warning": "for胥超",
   "desc": "",
@@ -119,39 +119,6 @@ const appConfig = {
 async function getConfig() {
   return jsonify(appConfig)
 }
-
-async function getSongs(ext) {
-  const { page, gid, id, from, text } = argsify(ext)
-  let songs = []
-
-  if (gid == '1') {
-    if (page > 1) {
-      return jsonify({
-        list: [],
-      })
-    }
-    const { data } = await $fetch.get('https://www.missevan.com/sound/newhomepagedata', {
-      headers
-    })
-    // $print(`***data: ${data}`)
-    argsify(data).info.music.forEach( genre => {
-      genre.objects_point.forEach ( each => {
-        songs.push({
-          id: `${each.id}`,
-          name: each.soundstr,
-          cover: each.front_cover,
-          duration: parseInt(each.duration / 100),
-          artist: {
-            id: `${each.user_id}`,
-            name: each.username
-          },
-          ext: {
-            id: each.id
-          }
-        })
-      })
-    })
-  }
 
   if (gid == '6') {
     if (page > 1) {
