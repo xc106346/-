@@ -6,9 +6,7 @@ const headers = {
   'User-Agent': UA,
 }
 
-  const { page, gid, from } = argsify(ext)
-  if (page > 1) {
-    return jsonify({const appConfig = {
+const appConfig = {
   "ver": 1,
   "name": "測試",
   "message": "",
