@@ -959,53 +959,56 @@ async function search(ext) {
 }
 
 async function getSongInfo(ext) {
-  const { url, id, qid, cid, bid, vid, pid } = argsify(ext)
-  if (url != undefined) {
-    return jsonify({ urls: [url] })
-  }
+  const { url, id, qid, cid, bid, vid, pid } = argsify(ext);
 
-  if (pid != undefined) {
-    return jsonify({ urls: [pid] })
-  }
+  // 处理直接返回的 URL
+  if (url) return jsonify({ urls: [url] });
+  if (pid) return jsonify({ urls: [pid] });
 
-  if (bid != undefined) {
-    return jsonify({ urls: [bid], headers: [{'referer': 'https://rainyscope.com/'}] })
-  }
+  // 处理不同的资源来源
+  const sources = [
+    { key: 'bid', url: bid, headers: [{ referer: 'https://rainyscope.com/' }] },
+    { key: 'vid', url: vid, headers: [{ referer: 'https://virtocean.com/' }] },
+    { key: 'id', url: `https://www.missevan.com/sound/getsound?soundid=${id}`, headers: [{ 'User-Agent': UA }] },
+    { key: 'qid', url: `https://lxmusicapi.onrender.com/url/tx/${qid}/320k`, headers: { 'X-Request-Key': 'share-v2' } },
+    { key: 'cid', url: `http://www.htqyy.com/play/${cid}`, customHandler: handleCid }
+  ];
 
-  if (vid != undefined) {
-    return jsonify({ urls: [vid], headers: [{'referer': 'https://virtocean.com/'}] })
-  }
-  
-  if ( id != undefined) {
-    const { data } = await $fetch.get(`https://www.missevan.com/sound/getsound?soundid=${id}`, {
-      headers
-    })
-    const soundurl = argsify(data).info.sound.soundurl
-    if (soundurl != undefined) {
-      return jsonify({ urls: [soundurl], headers: [{'User-Agent': UA}] })
+  for (let source of sources) {
+    if (source.url) {
+      const data = await $fetch.get(source.url, { headers: source.headers });
+      
+      if (source.key === 'cid') {
+        // 特殊处理 cid 的情况
+        const { urls, headers } = await source.customHandler(data);
+        return jsonify({ urls, headers });
+      }
+
+      const soundurl = getSoundUrlFromData(data, source.key);
+      if (soundurl) {
+        return jsonify({ urls: [soundurl] });
+      }
     }
   }
 
-  if (qid != undefined) {
-    const { data } = await $fetch.get(`https://lxmusicapi.onrender.com/url/tx/${qid}/320k`, {
-        headers: {
-            'X-Request-Key': 'share-v2',
-        },
-    })
-    const soundurl = argsify(data).url
-    if (soundurl != undefined) {
-        return jsonify({ urls: [soundurl] })
-    }
-  }
+  return jsonify({ urls: [] });
+}
 
-  if (cid != undefined) {
-    const { data } = await $fetch.get(`http://www.htqyy.com/play/${cid}`, {
-      headers
-    })
-    let fileHost = data.match(/var fileHost="(.*?)";/)[1]
-    let mp3 = data.match(/var mp3="(.*?)";/)[1]
-    return jsonify({ urls: [fileHost + mp3], headers: [{'referer': 'http://www.htqyy.com/'}] })
+// 处理 'cid' 特殊情况
+async function handleCid(data) {
+  const fileHost = data.match(/var fileHost="(.*?)";/)[1];
+  const mp3 = data.match(/var mp3="(.*?)";/)[1];
+  return { urls: [`${fileHost}${mp3}`], headers: [{ referer: 'http://www.htqyy.com/' }] };
+}
+
+// 从返回的 data 中提取 soundurl
+function getSoundUrlFromData(data, sourceKey) {
+  switch (sourceKey) {
+    case 'id':
+      return argsify(data).info?.sound?.soundurl;
+    case 'qid':
+      return argsify(data).url;
+    default:
+      return null;
   }
-  
-  return jsonify({ urls: [] })
 }
