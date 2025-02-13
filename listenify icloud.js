@@ -8,7 +8,7 @@ const headers = {
 
 const appConfig = {
   "ver": 1,
-  "name": "胥超个人",
+  "name": "測試",
   "message": "",
   "warning": "for胥超",
   "desc": "",
