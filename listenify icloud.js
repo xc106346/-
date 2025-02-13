@@ -6,44 +6,120 @@ const headers = {
   'User-Agent': UA,
 }
 
-const appConfig = {
-  ver: 1,
-  name: "測試",
-  message: "",
-  warning: "for胥超",
-  desc: "",
-  
-  tabLibrary: {
-    name: "探索",
-    groups: [
-      { name: "推荐", type: "song", gid: "1", showMore: true },
-      { name: "纯音乐", type: "song", gid: "5" },
-      { name: "白噪音", type: "song", gid: "6" },
-      { name: "音单", type: "album", gid: "2", showMore: true },
-      { name: "播客", type: "playlist", gid: "7", showMore: true, ui: 1 },
-      { name: "国风歌单", type: "playlist", gid: "3", showMore: true, ui: 1 },
-      { name: "流行歌单", type: "playlist", gid: "9", ui: 1 },
-      { name: "排行榜", type: "playlist", gid: "4", showMore: true, ui: 1 },
-      { name: "创作者", type: "artist", gid: "8" }
-    ]
-  },
 
-  tabMe: {
-    name: "我的",
-    groups: [
-      { name: "红心", type: "song" },
-      { name: "歌单", type: "playlist" },
-      { name: "专辑", type: "album" },
-      { name: "创作者", type: "artist" }
-    ]
-  },
 
-  tabSearch: {
-    name: "搜索",
-    groups: [{ name: "歌曲", type: "song" }]
+async function getPlaylists(ext) {
+  const { page, gid, from } = argsify(ext)
+  if (page > 1) {
+    return jsonify({const appConfig = {
+  "ver": 1,
+  "name": "測試",
+  "message": "",
+  "warning": "for胥超",
+  "desc": "",
+  "tabLibrary": {
+    "name": "探索",
+    "groups": [{
+        "name": "推荐",
+        "type": "song",
+        "ui": 0,
+        "showMore": true,
+        "ext": {
+            "gid": '1'
+        }
+    }, {
+      "name": "纯音乐",
+      "type": "song",
+      "ui": 0,
+      "showMore": false,
+      "ext": {
+          "gid": '5'
+      }
+    }, {
+      "name": "白噪音",
+      "type": "song",
+      "ui": 0,
+      "showMore": false,
+      "ext": {
+          "gid": '6'
+      }
+    }, {
+        "name": "音单",
+        "type": "album",
+        "ui": 0,
+        "showMore": true,
+        "ext": {
+            "gid": '2'
+        }
+    }, {
+      "name": "播客",
+      "type": "playlist",
+      "ui": 1,
+      "showMore": true,
+      "ext": {
+          "gid": '7'
+      }
+  }, {
+        "name": "国风歌单",
+        "type": "playlist",
+        "ui": 1,
+        "showMore": true,
+        "ext": {
+            "gid": '3'
+        }
+    }, {
+      "name": "流行歌单",
+      "type": "playlist",
+      "ui": 1,
+      "showMore": false,
+      "ext": {
+          "gid": '9'
+      }
+  }, {
+      "name": "排行榜",
+      "type": "playlist",
+      "ui": 1,
+      "showMore": true,
+      "ext": {
+          "gid": '4'
+      }
+    }, {
+      "name": "创作者",
+      "type": "artist",
+      "ui": 0,
+      "showMore": false,
+      "ext": {
+          "gid": '8'
+      }
+    }]
+  },
+  "tabMe": {
+    "name": "我的",
+    "groups": [{
+      "name": "红心",
+      "type": "song"
+    }, {
+      "name": "歌单",
+      "type": "playlist"
+    }, {
+      "name": "专辑",
+      "type": "album"
+    }, {
+      "name": "创作者",
+      "type": "artist"
+    }]
+  },
+  "tabSearch": {
+    "name": "搜索",
+    "groups": [{
+      "name": "歌曲",
+      "type": "song",
+      "ext": {
+        "type": "song"
+      }
+    }]
   }
-};
-
+}
 
 async function getConfig() {
   return jsonify(appConfig)
@@ -424,11 +500,6 @@ async function getArtists(ext) {
     list: artists,
   })
 }
-
-async function getPlaylists(ext) {
-  const { page, gid, from } = argsify(ext)
-  if (page > 1) {
-    return jsonify({
       list: [],
     })
   }
