@@ -863,99 +863,46 @@ async function getAlbumInfo(ext) {
 */
 
 async function search(ext) {
-  const { text, page, type } = argsify(ext)
+  const { text, page, type } = argsify(ext);
 
-  if (page > 3) {
-    return jsonify({})
-  }
+  // 限制页数，避免过多请求
+  if (page > 3) return jsonify({});
 
-  if (type == 'song') {
-    let songs = []
-    const { data } = await $fetch.get(`http://c.y.qq.com/soso/fcgi-bin/client_search_cp?new_json=1&t=0&aggr=1&cr=1&catZhida=1&lossless=0&flag_qc=0&p=${page}&n=20&w=${encodeURIComponent(text)}&needNewCode=0`, {
-      headers
-    })
-
-    // $print(`***song: ${data.slice(9, -1)}`)
-
-    argsify(data.slice(9, -1)).data?.song?.list?.forEach( each => {
-      songs.push({
-        id: `${each.mid}`,
-        name: each.name,
-        cover: `https://y.gtimg.cn/music/photo_new/T002R800x800M000${each.album.mid}.jpg`,
-        duration: 0,
-        artist: {
-          id: `${each.singer[0]?.id}`,
-          name: each.singer[0]?.name || '',
-        },
-        ext: {
-          qid: each.mid
-        }
-      })
-    })
-    
+  // 处理查询类型
+  if (type === 'song') {
     return jsonify({
-      list: songs,
-    })
+      list: await fetchSongs(text, page),
+    });
   }
 
-  /*
-  if (type == 'song') {
-    let songs = []
-    const { data } = await $fetch.get('https://www.missevan.com/sound/newhomepagedata', {
-      headers
-    })
+  return jsonify({});
+}
 
-    argsify(data).info.music.forEach( genre => {
-      genre.objects_point.forEach ( each => {
-        songs.push({
-          id: `${each.id}`,
-          name: each.soundstr,
-          cover: each.front_cover,
-          duration: parseInt(each.duration / 100),
-          artist: {
-            id: `${each.user_id}`,
-            name: each.username
-          },
-          ext: {
-            id: each.id
-          }
-        })
-      })
-    })
-    
-    return jsonify({
-      list: songs,
-    })
-  }
+// 获取歌曲信息的函数
+async function fetchSongs(text, page) {
+  const songs = [];
+  const { data } = await $fetch.get(`http://c.y.qq.com/soso/fcgi-bin/client_search_cp?new_json=1&t=0&aggr=1&cr=1&catZhida=1&lossless=0&flag_qc=0&p=${page}&n=20&w=${encodeURIComponent(text)}&needNewCode=0`, {
+    headers,
+  });
 
-  if (type == 'playlist') {
-    let cards = []
-    const { data } = await $fetch.get('https://www.missevan.com/explore/tagalbum?order=0', {
-      headers
-    })
+  const songList = argsify(data.slice(9, -1)).data?.song?.list || [];
+  songList.forEach(each => {
+    songs.push({
+      id: `${each.mid}`,
+      name: each.name,
+      cover: `https://y.gtimg.cn/music/photo_new/T002R800x800M000${each.album.mid}.jpg`,
+      duration: 0,  // 可以根据实际需求替换
+      artist: {
+        id: `${each.singer[0]?.id}`,
+        name: each.singer[0]?.name || '',
+      },
+      ext: {
+        qid: each.mid
+      }
+    });
+  });
 
-    argsify(data).albums.forEach( each => {
-      cards.push({
-        id: `${each.id}`,
-        name: each.title,
-        cover: each.front_cover,
-        artist: {
-          id: `${each.user_id}`,
-          name: each.username
-        },
-        ext: {
-          id: each.id
-        }
-      })
-    })
-
-    return jsonify({
-      list: cards
-    })
-  }
-  */
-  
-  return jsonify({})
+  return songs;
 }
 
 async function getSongInfo(ext) {
