@@ -6,9 +6,6 @@ const headers = {
   'User-Agent': UA,
 }
 
-
-
-async function getPlaylists(ext) {
   const { page, gid, from } = argsify(ext)
   if (page > 1) {
     return jsonify({const appConfig = {
